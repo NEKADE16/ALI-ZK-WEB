@@ -2,211 +2,395 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>تسجيل الدخول - ALI ZK Code</title>
-    <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* تحسينات إضافية للصفحة */
-        .auth-container {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 80px 20px 40px;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
-        .auth-card {
-            max-width: 500px;
+
+        /* خلفية متحركة من Google - تأثير Matrix Code */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            background: rgba(255,255,255,0.98);
-            border-radius: 24px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3e 50%, #0a0a2a 100%);
         }
+
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        .code-particle {
+            position: fixed;
+            font-family: monospace;
+            font-size: 14px;
+            color: #00ff88;
+            animation: fall linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* تأثير الضباب */
+        .matrix-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(108,92,231,0.3) 0%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+        }
+
+        /* بطاقة تسجيل الدخول */
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-card {
+            background: rgba(15, 25, 45, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 32px;
+            padding: 2rem 1.5rem;
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .auth-logo i {
+            font-size: 3rem;
+            color: #00cec9;
+        }
+
+        .auth-logo h2 {
+            color: white;
+            margin-top: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .auth-logo span {
+            color: #00cec9;
+        }
+
+        .auth-header p {
+            color: #94a3b8;
+            margin-top: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        /* الأزرار العلوية */
         .auth-tabs {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+            margin-bottom: 1.8rem;
+            background: rgba(255,255,255,0.05);
+            padding: 0.3rem;
+            border-radius: 60px;
         }
+
         .tab-btn {
             flex: 1;
-            padding: 12px 8px;
-            background: #f1f5f9;
+            padding: 10px;
+            background: transparent;
             border: none;
-            border-radius: 12px;
+            border-radius: 40px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: all 0.3s;
+            color: #94a3b8;
         }
+
         .tab-btn.active {
             background: #6c5ce7;
             color: white;
         }
+
+        /* النماذج */
         .auth-form {
             display: none;
         }
+
         .auth-form.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* الحقول */
         .input-group {
             position: relative;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
         }
+
         .input-group i:first-child {
             position: absolute;
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: #64748b;
             z-index: 1;
+            font-size: 0.9rem;
         }
+
         .input-group input {
             width: 100%;
-            padding: 12px 45px 12px 15px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            font-size: 1rem;
+            padding: 14px 45px 14px 15px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            font-size: 0.95rem;
+            color: white;
             transition: all 0.3s;
-            background: white;
         }
+
         .input-group input:focus {
             outline: none;
             border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108,92,231,0.1);
+            background: rgba(255,255,255,0.12);
         }
+
+        .input-group input::placeholder {
+            color: #64748b;
+        }
+
         .toggle-password {
             position: absolute;
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #94a3b8;
+            color: #64748b;
             z-index: 1;
         }
+
+        /* CAPTCHA */
         .captcha-container {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 14px;
+            background: rgba(255,255,255,0.05);
+            padding: 0.8rem;
+            border-radius: 16px;
             margin: 1rem 0;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+
+        .captcha-container p {
+            color: #94a3b8;
+            margin-bottom: 0.8rem;
+            font-size: 0.8rem;
+        }
+
         .captcha-box {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
+
         .captcha-box span {
-            background: white;
+            background: rgba(0,0,0,0.5);
             padding: 10px 16px;
             border-radius: 12px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             font-family: monospace;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #6c5ce7;
+            color: #00cec9;
             min-width: 100px;
             text-align: center;
         }
+
         .captcha-box input {
             flex: 1;
             padding: 10px;
-            border: 1px solid #e2e8f0;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 12px;
             text-align: center;
+            color: white;
             min-width: 80px;
         }
+
+        .captcha-box input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
         .btn-captcha-refresh {
-            background: none;
+            background: rgba(108,92,231,0.2);
             border: none;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 0.8rem;
             color: #6c5ce7;
             margin-top: 10px;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
         }
-        .btn-captcha-refresh:hover {
-            color: #5b4bc4;
-        }
-        .btn-block {
-            width: 100%;
-            justify-content: center;
-            margin-top: 0.5rem;
-        }
-        .btn-google {
-            background: #4285f4;
-            color: white;
-            display: flex;
+
+        /* الأزرار الرئيسية */
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            font-size: 0.95rem;
             width: 100%;
-            padding: 12px;
-            border-radius: 14px;
-            font-weight: 600;
         }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(108,92,231,0.4);
+        }
+
+        .btn-google {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
         .btn-google:hover {
-            background: #3367d6;
+            background: #4285f4;
             transform: translateY(-2px);
         }
+
         .auth-divider {
             text-align: center;
             margin: 1.5rem 0;
             position: relative;
         }
+
         .auth-divider::before,
         .auth-divider::after {
             content: '';
             position: absolute;
             top: 50%;
-            width: 45%;
+            width: 42%;
             height: 1px;
-            background: #e2e8f0;
+            background: rgba(255,255,255,0.1);
         }
+
         .auth-divider::before { left: 0; }
         .auth-divider::after { right: 0; }
+
         .auth-divider span {
-            background: white;
-            padding: 0 12px;
-            color: #94a3b8;
-            font-size: 0.85rem;
+            background: transparent;
+            padding: 0 10px;
+            color: #64748b;
+            font-size: 0.8rem;
         }
+
+        /* التنبيهات */
         .alert {
             padding: 12px;
-            border-radius: 12px;
-            margin: 15px 0 0;
-            font-size: 0.85rem;
-        }
-        .alert-danger {
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-        }
-        .alert-success {
-            background: #dcfce7;
-            color: #16a34a;
-            border: 1px solid #bbf7d0;
-        }
-        .forgot-info {
-            color: #64748b;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        .auth-message {
+            border-radius: 14px;
             margin-top: 1rem;
+            font-size: 0.8rem;
+            text-align: center;
         }
-        @media (max-width: 480px) {
+
+        .alert-danger {
+            background: rgba(220,38,38,0.2);
+            color: #f87171;
+            border: 1px solid rgba(220,38,38,0.3);
+        }
+
+        .alert-success {
+            background: rgba(34,197,94,0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34,197,94,0.3);
+        }
+
+        .forgot-info {
+            color: #94a3b8;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        /* سكرول ناعم */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #6c5ce7;
+            border-radius: 10px;
+        }
+
+        /* جوال */
+        @media (max-width: 500px) {
             .auth-card {
-                padding: 1.5rem;
+                padding: 1.5rem 1.2rem;
             }
             .tab-btn {
-                font-size: 0.8rem;
-                padding: 10px 5px;
+                font-size: 0.75rem;
+                padding: 8px;
             }
             .captcha-box {
                 flex-direction: column;
@@ -218,10 +402,17 @@
             .captcha-box input {
                 width: 100%;
             }
+            .btn {
+                padding: 12px;
+            }
         }
     </style>
 </head>
-<body class="auth-page">
+<body>
+    <!-- خلفية متحركة من Google - تأثير Matrix Code -->
+    <div class="matrix-bg"></div>
+    <canvas id="matrixCanvas" class="matrix-rain"></canvas>
+
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -229,7 +420,7 @@
                     <i class="fas fa-code"></i>
                     <h2>ALI ZK <span>code</span></h2>
                 </div>
-                <p style="color:#64748b; margin-top:8px;">سجل دخولك للوصول إلى المنصة</p>
+                <p>سجل دخولك للوصول إلى المنصة</p>
             </div>
             
             <div class="auth-tabs">
@@ -250,9 +441,8 @@
                     <i class="fas fa-eye toggle-password"></i>
                 </div>
                 
-                <!-- CAPTCHA -->
                 <div class="captcha-container">
-                    <p style="margin-bottom:10px; font-size:0.85rem;"><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
+                    <p><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
                     <div class="captcha-box">
                         <span id="captchaQuestion">5 + 3 = ?</span>
                         <input type="text" id="captchaInput" placeholder="أدخل الإجابة" maxlength="3" autocomplete="off">
@@ -260,7 +450,7 @@
                     <button type="button" id="refreshCaptcha" class="btn-captcha-refresh"><i class="fas fa-sync-alt"></i> تحديث</button>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i> دخول
                 </button>
                 
@@ -268,7 +458,7 @@
                     <span>أو</span>
                 </div>
                 
-                <button type="button" id="googleLoginBtn" class="btn-google btn-block">
+                <button type="button" id="googleLoginBtn" class="btn btn-google">
                     <i class="fab fa-google"></i> تسجيل الدخول عبر Google
                 </button>
             </form>
@@ -294,9 +484,8 @@
                     <i class="fas fa-eye toggle-password"></i>
                 </div>
                 
-                <!-- CAPTCHA للتسجيل -->
                 <div class="captcha-container">
-                    <p style="margin-bottom:10px; font-size:0.85rem;"><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
+                    <p><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
                     <div class="captcha-box">
                         <span id="captchaQuestionReg">5 + 3 = ?</span>
                         <input type="text" id="captchaInputReg" placeholder="أدخل الإجابة" maxlength="3" autocomplete="off">
@@ -304,7 +493,7 @@
                     <button type="button" id="refreshCaptchaReg" class="btn-captcha-refresh"><i class="fas fa-sync-alt"></i> تحديث</button>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-user-plus"></i> إنشاء حساب
                 </button>
             </form>
@@ -317,9 +506,8 @@
                     <input type="email" id="forgotEmail" placeholder="البريد الإلكتروني" required autocomplete="email">
                 </div>
                 
-                <!-- CAPTCHA لاستعادة -->
                 <div class="captcha-container">
-                    <p style="margin-bottom:10px; font-size:0.85rem;"><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
+                    <p><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
                     <div class="captcha-box">
                         <span id="captchaQuestionForgot">5 + 3 = ?</span>
                         <input type="text" id="captchaInputForgot" placeholder="أدخل الإجابة" maxlength="3" autocomplete="off">
@@ -327,17 +515,346 @@
                     <button type="button" id="refreshCaptchaForgot" class="btn-captcha-refresh"><i class="fas fa-sync-alt"></i> تحديث</button>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-paper-plane"></i> إرسال رابط الاستعادة
                 </button>
                 <div id="forgotMessage" class="auth-message"></div>
             </form>
 
-            <div id="authMessage" class="auth-message"></div>
+            <div id="authMessage"></div>
         </div>
     </div>
 
-    <script src="js/script.js"></script>
-    <script src="js/google-auth.js"></script>
+    <script>
+        // ========== الخلفية المتحركة ==========
+        const canvas = document.getElementById('matrixCanvas');
+        if (canvas) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const ctx = canvas.getContext('2d');
+            
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+{}[]|;:,.<>?/~`";
+            const fontSize = 14;
+            let columns = Math.floor(canvas.width / fontSize);
+            let drops = [];
+            
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * -canvas.height);
+            }
+            
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(10, 10, 42, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff88';
+                ctx.font = fontSize + 'px monospace';
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(drawMatrix, 50);
+            
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                columns = Math.floor(canvas.width / fontSize);
+                drops = [];
+                for (let i = 0; i < columns; i++) {
+                    drops[i] = Math.floor(Math.random() * -canvas.height);
+                }
+            });
+        }
+
+        // ========== دوال مساعدة ==========
+        function setLocal(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function getLocal(key) {
+            return JSON.parse(localStorage.getItem(key)) || [];
+        }
+
+        // تهيئة البيانات
+        if (!localStorage.getItem('users')) {
+            setLocal('users', [
+                { id: 1, name: 'علي الزين', email: 'samartaleb90@gmail.com', password: '12344321', role: 'admin', date: new Date().toISOString(), provider: 'local' }
+            ]);
+        }
+
+        if (!localStorage.getItem('files')) {
+            setLocal('files', []);
+        }
+
+        if (!localStorage.getItem('captchaEnabled')) {
+            setLocal('captchaEnabled', true);
+        }
+
+        // ========== دوال CAPTCHA ==========
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 10);
+            const num2 = Math.floor(Math.random() * 10);
+            const operation = Math.random() > 0.5 ? '+' : '-';
+            let answer;
+            if (operation === '+') {
+                answer = num1 + num2;
+            } else {
+                answer = num1 - num2;
+            }
+            return { question: `${num1} ${operation} ${num2} = ?`, answer: answer.toString() };
+        }
+
+        function initCaptchas() {
+            const loginCaptcha = generateCaptcha();
+            const registerCaptcha = generateCaptcha();
+            const forgotCaptcha = generateCaptcha();
+            
+            const loginQuestion = document.getElementById('captchaQuestion');
+            const registerQuestion = document.getElementById('captchaQuestionReg');
+            const forgotQuestion = document.getElementById('captchaQuestionForgot');
+            
+            if (loginQuestion) {
+                loginQuestion.textContent = loginCaptcha.question;
+                loginQuestion.dataset.answer = loginCaptcha.answer;
+            }
+            if (registerQuestion) {
+                registerQuestion.textContent = registerCaptcha.question;
+                registerQuestion.dataset.answer = registerCaptcha.answer;
+            }
+            if (forgotQuestion) {
+                forgotQuestion.textContent = forgotCaptcha.question;
+                forgotQuestion.dataset.answer = forgotCaptcha.answer;
+            }
+        }
+
+        function refreshCaptcha(elementId, inputId) {
+            const newCaptcha = generateCaptcha();
+            const questionSpan = document.getElementById(elementId);
+            if (questionSpan) {
+                questionSpan.textContent = newCaptcha.question;
+                questionSpan.dataset.answer = newCaptcha.answer;
+            }
+            const input = document.getElementById(inputId);
+            if (input) input.value = '';
+        }
+
+        // ========== إظهار/إخفاء كلمة السر ==========
+        document.querySelectorAll('.toggle-password').forEach(icon => {
+            icon.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    this.classList.remove('fa-eye');
+                    this.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    this.classList.remove('fa-eye-slash');
+                    this.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // ========== تبديل التبويبات ==========
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+                const formId = tab.dataset.tab + 'Form';
+                document.getElementById(formId).classList.add('active');
+            });
+        });
+
+        // ========== تحديث CAPTCHA ==========
+        document.getElementById('refreshCaptcha')?.addEventListener('click', () => refreshCaptcha('captchaQuestion', 'captchaInput'));
+        document.getElementById('refreshCaptchaReg')?.addEventListener('click', () => refreshCaptcha('captchaQuestionReg', 'captchaInputReg'));
+        document.getElementById('refreshCaptchaForgot')?.addEventListener('click', () => refreshCaptcha('captchaQuestionForgot', 'captchaInputForgot'));
+
+        // ========== تسجيل الدخول ==========
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // التحقق من CAPTCHA
+                const captchaAnswer = document.getElementById('captchaQuestion').dataset.answer;
+                const userAnswer = document.getElementById('captchaInput').value;
+                if (userAnswer !== captchaAnswer) {
+                    document.getElementById('authMessage').innerHTML = '<div class="alert alert-danger">❌ إجابة CAPTCHA غير صحيحة</div>';
+                    initCaptchas();
+                    return;
+                }
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                const users = getLocal('users');
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    if (user.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    document.getElementById('authMessage').innerHTML = '<div class="alert alert-danger">❌ البريد الإلكتروني أو كلمة السر غير صحيحة</div>';
+                }
+            });
+        }
+
+        // ========== إنشاء حساب ==========
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const captchaAnswer = document.getElementById('captchaQuestionReg').dataset.answer;
+                const userAnswer = document.getElementById('captchaInputReg').value;
+                if (userAnswer !== captchaAnswer) {
+                    document.getElementById('authMessage').innerHTML = '<div class="alert alert-danger">❌ إجابة CAPTCHA غير صحيحة</div>';
+                    initCaptchas();
+                    return;
+                }
+                
+                const name = document.getElementById('regName').value;
+                const email = document.getElementById('regEmail').value;
+                const password = document.getElementById('regPassword').value;
+                const confirm = document.getElementById('regConfirmPassword').value;
+                
+                if (!name || !email || !password) {
+                    document.getElementById('authMessage').innerHTML = '<div class="alert alert-danger">❌ جميع الحقول مطلوبة</div>';
+                    return;
+                }
+                
+                if (password !== confirm) {
+                    document.getElementById('authMessage').innerHTML = '<div class="alert alert-danger">❌ كلمة السر غير متطابقة</div>';
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    document.getElementById('authMessage').innerHTML = '<div class="alert alert-danger">❌ كلمة السر يجب أن تكون 6 أحرف على الأقل</div>';
+                    return;
+                }
+                
+                const users = getLocal('users');
+                if (users.find(u => u.email === email)) {
+                    document.getElementById('authMessage').innerHTML = '<div class="alert alert-danger">❌ البريد الإلكتروني موجود مسبقاً</div>';
+                    return;
+                }
+                
+                const newUser = {
+                    id: users.length + 1,
+                    name, email, password,
+                    role: 'user',
+                    date: new Date().toISOString(),
+                    provider: 'local'
+                };
+                users.push(newUser);
+                setLocal('users', users);
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                window.location.href = 'index.html';
+            });
+        }
+
+        // ========== استعادة كلمة المرور ==========
+        const forgotForm = document.getElementById('forgotForm');
+        if (forgotForm) {
+            forgotForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const captchaAnswer = document.getElementById('captchaQuestionForgot').dataset.answer;
+                const userAnswer = document.getElementById('captchaInputForgot').value;
+                if (userAnswer !== captchaAnswer) {
+                    document.getElementById('forgotMessage').innerHTML = '<div class="alert alert-danger">❌ إجابة CAPTCHA غير صحيحة</div>';
+                    initCaptchas();
+                    return;
+                }
+                
+                const email = document.getElementById('forgotEmail').value;
+                const users = getLocal('users');
+                const user = users.find(u => u.email === email);
+                
+                if (user) {
+                    const resetLink = window.location.origin + '/login.html';
+                    document.getElementById('forgotMessage').innerHTML = `<div class="alert alert-success">✅ تم إرسال رابط استعادة كلمة المرور إلى ${email}<br><small>الرابط: ${resetLink}</small></div>`;
+                } else {
+                    document.getElementById('forgotMessage').innerHTML = '<div class="alert alert-danger">❌ لا يوجد حساب مرتبط بهذا البريد الإلكتروني</div>';
+                }
+            });
+        }
+
+        // ========== تسجيل الدخول عبر Google (مباشر) ==========
+        const googleBtn = document.getElementById('googleLoginBtn');
+        if (googleBtn) {
+            googleBtn.addEventListener('click', () => {
+                // فتح نافذة تسجيل الدخول عبر Google - رابط مباشر
+                const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+                    redirect_uri: window.location.origin + '/login.html',
+                    response_type: 'token',
+                    scope: 'email profile',
+                    include_granted_scopes: 'true',
+                    state: 'pass-through'
+                }).toString();
+                
+                // محاكاة مؤقتة لحين تفعيل Client ID الحقيقي
+                const useMock = true; // ضع false عند وجود Client ID حقيقي
+                
+                if (useMock) {
+                    const googleEmail = prompt('🔐 تسجيل الدخول عبر Google (محاكاة مؤقتة)\nأدخل بريد Google الخاص بك:', 'example@gmail.com');
+                    if (googleEmail && googleEmail.includes('@')) {
+                        const users = getLocal('users');
+                        let user = users.find(u => u.email === googleEmail);
+                        
+                        if (!user) {
+                            const name = googleEmail.split('@')[0];
+                            const newUser = {
+                                id: users.length + 1,
+                                name: name,
+                                email: googleEmail,
+                                password: 'google-auth',
+                                role: 'user',
+                                date: new Date().toISOString(),
+                                provider: 'google'
+                            };
+                            users.push(newUser);
+                            setLocal('users', users);
+                            user = newUser;
+                            alert(`✅ تم إنشاء حساب جديد باستخدام Google: ${name}`);
+                        }
+                        
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        if (user.role === 'admin') {
+                            window.location.href = 'admin.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }
+                } else {
+                    window.open(googleAuthUrl, '_blank', 'width=500,height=600');
+                }
+            });
+        }
+
+        // ========== تهيئة CAPTCHA عند تحميل الصفحة ==========
+        initCaptchas();
+
+        // ========== التحقق من الجلسة الحالية ==========
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && window.location.pathname.includes('login.html')) {
+            if (currentUser.role === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
 </body>
 </html>
