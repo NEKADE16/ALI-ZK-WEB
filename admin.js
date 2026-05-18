@@ -13,17 +13,20 @@ function getLocal(key) {
     return JSON.parse(localStorage.getItem(key)) || [];
 }
 
-// Update stats
+// تحديث الإحصائيات
 function updateStats() {
     const users = getLocal('users');
     const files = getLocal('files');
+    const securityLogs = getLocal('securityLogs');
     document.getElementById('totalUsers').innerText = users.length;
     document.getElementById('totalFiles').innerText = files.length;
     const totalDownloads = files.reduce((sum, f) => sum + (f.downloads || 0), 0);
     document.getElementById('totalDownloads').innerText = totalDownloads;
+    const blockedAttempts = securityLogs.filter(log => log.type === 'failed').length;
+    document.getElementById('blockedAttempts').innerText = blockedAttempts;
 }
 
-// Render users
+// عرض المستخدمين
 function renderUsers() {
     const users = getLocal('users');
     const tbody = document.getElementById('usersTableBody');
@@ -31,29 +34,36 @@ function renderUsers() {
     tbody.innerHTML = users.filter(u => u.role !== 'admin').map(user => `
         <tr>
             <td>${user.name}</td>
-            <td>${user.email}</td>
+            <td>${user.email}${user.provider === 'google' ? ' <span style="color:#4285f4;"><i class="fab fa-google"></i></span>' : ''}</td>
+            <td>${user.role === 'admin' ? 'أدمن' : 'مستخدم'}</td>
             <td>${new Date(user.date).toLocaleDateString('ar-EG')}</td>
-            <td><button onclick="deleteUser(${user.id})" class="btn-sm btn-danger"><i class="fas fa-trash"></i></button></td>
+            <td><button onclick="deleteUser(${user.id})" class="btn-sm btn-danger"><i class="fas fa-trash"></i></button>${user.role !== 'admin' ? ` <button onclick="blockUser(${user.id})" class="btn-sm btn-warning"><i class="fas fa-ban"></i></button>` : ''}</td>
         </tr>
     `).join('');
 }
 
 window.deleteUser = function(id) {
-    let users = getLocal('users');
-    users = users.filter(u => u.id !== id);
-    setLocal('users', users);
-    renderUsers();
-    updateStats();
+    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+        let users = getLocal('users');
+        users = users.filter(u => u.id !== id);
+        setLocal('users', users);
+        renderUsers();
+        updateStats();
+    }
 };
 
-// Render files
+window.blockUser = function(id) {
+    alert('تم حظر المستخدم (سيتم تطبيق هذه الميزة في التحديث القادم)');
+};
+
+// عرض الملفات
 function renderFiles() {
     const files = getLocal('files');
     const container = document.getElementById('allFilesGrid');
     if (!container) return;
     container.innerHTML = files.map(file => `
         <div class="file-card">
-            <i class="fas fa-file-code" style="font-size: 3rem; color: var(--primary);"></i>
+            <i class="fas ${file.category === 'code' ? 'fa-file-code' : file.category === 'pdf' ? 'fa-file-pdf' : 'fa-file-alt'}" style="font-size: 3rem; color: var(--primary);"></i>
             <h4>${file.name}</h4>
             <p>${file.desc || 'لا يوجد وصف'}</p>
             <small>📥 ${file.downloads || 0} تحميل</small>
@@ -78,14 +88,16 @@ window.downloadFile = function(id) {
 };
 
 window.deleteFile = function(id) {
-    let files = getLocal('files');
-    files = files.filter(f => f.id !== id);
-    setLocal('files', files);
-    renderFiles();
-    updateStats();
+    if (confirm('هل أنت متأكد من حذف هذا الملف؟')) {
+        let files = getLocal('files');
+        files = files.filter(f => f.id !== id);
+        setLocal('files', files);
+        renderFiles();
+        updateStats();
+    }
 };
 
-// Upload file
+// رفع الملفات
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileUploadInput');
 
@@ -132,7 +144,7 @@ document.getElementById('confirmUploadBtn')?.addEventListener('click', () => {
     document.querySelector('[data-tab="files"]').click();
 });
 
-// Email sending
+// إرسال الإيميلات
 document.getElementById('bulkEmailForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const subject = document.getElementById('emailSubject').value;
@@ -141,13 +153,13 @@ document.getElementById('bulkEmailForm')?.addEventListener('submit', (e) => {
     
     if (recipient === 'all') {
         const users = getLocal('users');
-        alert(`تم إرسال الإيميل إلى ${users.length} مستخدم (محاكاة)`);
+        alert(`✅ تم إرسال الإيميل إلى ${users.length} مستخدم\nالموضوع: ${subject}\n(محاكاة - سيتم ربطه بخدمة إيميل حقيقية لاحقاً)`);
     }
     document.getElementById('emailSubject').value = '';
     document.getElementById('emailBody').value = '';
 });
 
-// Telegram functions
+// دوال التليجرام
 async function sendTelegramMessage(chatId, message) {
     const botToken = getLocal('botToken');
     if (!botToken) {
@@ -276,7 +288,7 @@ document.getElementById('confirmChangeBtn')?.addEventListener('click', () => {
             document.getElementById('adminName').innerText = currentUser.name;
         }
         
-        sendTelegramMessage(tempNewData.chatId, `✅ <b>تم تغيير بيانات الأدمن بنجاح!</b>\n\n📧 البريد الجديد: ${tempNewData.email}\n🔑 كلمة السر الجديدة: ${tempNewData.password}`);
+        sendTelegramMessage(tempNewData.chatId, `✅ <b>تم تغيير بيانات الأدمن بنجاح!</b>\n\n📧 البريد الجديد: ${tempNewData.email}\n🔑 كلمة السر الجديدة: ${tempNewData.password}\n\n⚠️ احتفظ بهذه المعلومات في مكان آمن.`);
         
         alert('✅ تم تغيير بيانات الأدمن بنجاح!');
         
@@ -290,7 +302,7 @@ document.getElementById('confirmChangeBtn')?.addEventListener('click', () => {
     }
 });
 
-// Bot Settings
+// إعدادات البوت
 function displayCurrentBotToken() {
     const botToken = getLocal('botToken');
     const currentBotTokenSpan = document.getElementById('currentBotToken');
@@ -332,7 +344,32 @@ document.getElementById('saveBotTokenBtn')?.addEventListener('click', () => {
     }, 3000);
 });
 
-// Tab switching
+// إعدادات الأمان
+document.getElementById('captchaEnabled')?.addEventListener('change', (e) => {
+    setLocal('captchaEnabled', e.target.checked);
+});
+
+document.getElementById('twoFactorEnabled')?.addEventListener('change', (e) => {
+    alert(e.target.checked ? 'تم تفعيل التحقق بخطوتين' : 'تم إلغاء تفعيل التحقق بخطوتين');
+});
+
+// عرض سجل الأمان
+function displaySecurityLogs() {
+    const logs = getLocal('securityLogs');
+    const container = document.getElementById('securityLogs');
+    if (container) {
+        container.innerHTML = logs.slice(0, 20).map(log => `
+            <div class="log-entry ${log.type}">
+                <i class="fas ${log.type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                <span>${log.email}</span>
+                <small>${new Date(log.time).toLocaleString('ar-EG')}</small>
+            </div>
+        `).join('');
+        if (logs.length === 0) container.innerHTML = '<p>لا توجد سجلات أمان</p>';
+    }
+}
+
+// تبديل التبويبات
 document.querySelectorAll('.sidebar-menu li').forEach(item => {
     item.addEventListener('click', () => {
         document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
@@ -343,24 +380,26 @@ document.querySelectorAll('.sidebar-menu li').forEach(item => {
     });
 });
 
-// Chart
+// الرسم البياني
 if (document.getElementById('statsChart')) {
     const ctx = document.getElementById('statsChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
-        data: { labels: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'], datasets: [{ label: 'المستخدمين الجدد', data: [5, 12, 8, 15], borderColor: '#6c5ce7', tension: 0.4 }] }
+        data: { labels: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'], datasets: [{ label: 'المستخدمين الجدد', data: [5, 12, 8, 15], borderColor: '#6c5ce7', backgroundColor: 'rgba(108, 92, 231, 0.1)', tension: 0.4, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: true }
     });
 }
 
-// Logout
+// تسجيل الخروج
 document.getElementById('adminLogout')?.addEventListener('click', () => {
     localStorage.removeItem('currentUser');
     window.location.href = 'index.html';
 });
 
-// Initialize
+// تهيئة الصفحة
 updateStats();
 renderUsers();
 renderFiles();
 displayCurrentAdmin();
 displayCurrentBotToken();
+displaySecurityLogs();

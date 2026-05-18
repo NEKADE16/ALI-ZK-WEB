@@ -9,10 +9,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <!-- زر الوضع الليلي/النهاري -->
     <div class="theme-switch">
         <i class="fas fa-moon"></i>
     </div>
 
+    <!-- شريط التنقل -->
     <nav class="navbar">
         <div class="container">
             <div class="logo">
@@ -25,6 +27,8 @@
                 <li><a href="#features"><i class="fas fa-star"></i> المميزات</a></li>
                 <li><a href="#about"><i class="fas fa-user"></i> عني</a></li>
                 <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> دخول</a></li>
+                <li><a href="admin.html" id="adminLink" style="display:none;"><i class="fas fa-shield-alt"></i> لوحة التحكم</a></li>
+                <li><a href="#" id="logoutBtn" style="display:none;"><i class="fas fa-sign-out-alt"></i> خروج</a></li>
             </ul>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
@@ -32,13 +36,15 @@
         </div>
     </nav>
 
+    <!-- القسم الرئيسي -->
     <section id="home" class="hero">
         <div class="hero-overlay"></div>
+        <div class="particles"></div>
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="glitch" data-text="ALI ZK Code">ALI ZK Code</h1>
                 <p class="typing-text">مبرمج <span id="typed"></span></p>
-                <p>أهلاً بك في منصتي الخاصة. هنا تجد كل ما تحتاجه من ملفات ودروس ومشاريع برمجية.</p>
+                <p>أهلاً بك في منصتي الخاصة. هنا تجد كل ما تحتاجه من ملفات ودروس ومشاريع برمجية بأمان تام.</p>
                 <div class="hero-buttons">
                     <a href="login.html" class="btn btn-primary"><i class="fas fa-rocket"></i> ابدأ الآن</a>
                     <a href="#features" class="btn btn-outline"><i class="fas fa-play"></i> اكتشف المزيد</a>
@@ -46,15 +52,20 @@
             </div>
             <div class="hero-image">
                 <div class="code-animation">
-                    <div class="code-line">&lt;?php echo "Hello World"; ?&gt;</div>
-                    <div class="code-line">console.log("ALI ZK");</div>
-                    <div class="code-line">print("مرحباً بالعالم")</div>
-                    <div class="code-line">System.out.println("Java");</div>
+                    <div class="code-line"><span style="color:#ff6b6b;">&lt;?php</span> <span style="color:#ffd93d;">echo</span> <span style="color:#6bcb77;">"Hello World"</span>; ?&gt;</div>
+                    <div class="code-line"><span style="color:#ffd93d;">console</span>.<span style="color:#6bcb77;">log</span>(<span style="color:#ff6b6b;">"ALI ZK"</span>);</div>
+                    <div class="code-line"><span style="color:#ffd93d;">print</span>(<span style="color:#6bcb77;">"مرحباً بالعالم"</span>)</div>
+                    <div class="code-line"><span style="color:#6bcb77;">System.out.println</span>(<span style="color:#ff6b6b;">"Java"</span>);</div>
+                    <div class="code-line"><span style="color:#ffd93d;">await</span> <span style="color:#6bcb77;">fetch</span>(<span style="color:#ff6b6b;">'/api/data'</span>);</div>
                 </div>
             </div>
         </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
     </section>
 
+    <!-- قسم المميزات -->
     <section id="features" class="features">
         <div class="container">
             <h2 class="section-title"><i class="fas fa-gem"></i> مميزات المنصة</h2>
@@ -62,27 +73,38 @@
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-folder-open"></i></div>
                     <h3>مكتبة الملفات</h3>
-                    <p>رفع وتنزيل وتنظيم ملفاتك البرمجية</p>
+                    <p>رفع وتنزيل وتنظيم ملفاتك البرمجية بسهولة وأمان</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
                     <h3>أمان كامل</h3>
-                    <p>نظام تسجيل دخول آمن وحماية للملفات</p>
+                    <p>حماية من البوتات ونظام تسجيل دخول متطور بخطوتين</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
                     <h3>إحصائيات دقيقة</h3>
-                    <p>لوحة تحكم تعرض عدد المستخدمين والملفات</p>
+                    <p>لوحة تحكم تعرض عدد المستخدمين والملفات والتفاعلات</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-envelope"></i></div>
                     <h3>تواصل فوري</h3>
-                    <p>إرسال إيميلات للمستخدمين مباشرة من لوحة الأدمن</p>
+                    <p>إرسال إيميلات واستعادة كلمة المرور عبر البريد الإلكتروني</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fab fa-google"></i></div>
+                    <h3>تسجيل دخول عبر Google</h3>
+                    <p>سجل دخول بسهولة باستخدام حساب Google الخاص بك</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-database"></i></div>
+                    <h3>تخزين سحابي</h3>
+                    <p>احفظ ملفاتك بأمان واسترجاعها من أي جهاز</p>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- قسم عن المطور -->
     <section id="about" class="about">
         <div class="container">
             <div class="about-content">
@@ -94,20 +116,17 @@
                 <div class="about-text">
                     <h2><i class="fas fa-user-secret"></i> من أنا؟</h2>
                     <h3>ALI ZK - مبرمج ومطور ويب</h3>
-                    <p>أنا علي، مطور ويب محترف. أقدم لكم منصة متكاملة تضم كل ما تحتاجونه من ملفات وأدوات برمجية.</p>
+                    <p>أنا علي، مطور ويب محترف. أقدم لكم منصة متكاملة تضم كل ما تحتاجونه من ملفات وأدوات برمجية. هدفي مساعدة المبرمجين العرب على تطوير مهاراتهم مع توفير أعلى مستويات الأمان.</p>
                     <div class="skills">
-                        <span>PHP</span>
-                        <span>JavaScript</span>
-                        <span>Python</span>
-                        <span>HTML/CSS</span>
-                        <span>React</span>
-                        <span>Node.js</span>
+                        <span>PHP</span><span>JavaScript</span><span>Python</span>
+                        <span>HTML/CSS</span><span>React</span><span>Node.js</span>
                     </div>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-github"></i></a>
                         <a href="#"><i class="fab fa-linkedin"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
                     </div>
                 </div>
             </div>

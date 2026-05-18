@@ -11,7 +11,6 @@
 </head>
 <body class="admin-body">
     <div class="admin-wrapper">
-        <!-- الشريط الجانبي -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-code"></i>
@@ -23,7 +22,9 @@
                 <li data-tab="files"><i class="fas fa-folder-open"></i> إدارة الملفات</li>
                 <li data-tab="upload"><i class="fas fa-upload"></i> رفع ملف</li>
                 <li data-tab="email"><i class="fas fa-envelope"></i> إرسال إيميل</li>
-                <li data-tab="stats"><i class="fas fa-chart-bar"></i> الإحصائيات</li>
+                <li data-tab="security"><i class="fas fa-shield-alt"></i> الأمان والحماية</li>
+                <li data-tab="changeAdmin"><i class="fas fa-user-shield"></i> تغيير بيانات الأدمن</li>
+                <li data-tab="botSettings"><i class="fab fa-telegram"></i> إعدادات البوت</li>
                 <li data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</li>
             </ul>
             <div class="sidebar-footer">
@@ -32,7 +33,6 @@
             </div>
         </aside>
 
-        <!-- المحتوى الرئيسي -->
         <main class="admin-main">
             <div class="admin-header">
                 <div class="admin-search">
@@ -41,142 +41,97 @@
                 </div>
                 <div class="admin-user">
                     <span>مرحباً، <strong id="adminName">أدمن</strong></span>
-                    <img src="https://via.placeholder.com/40" alt="Admin">
+                    <div class="admin-avatar">A</div>
                 </div>
             </div>
 
             <div class="admin-content">
-                <!-- تبويب لوحة المعلومات -->
+                <!-- Dashboard -->
                 <div id="dashboard" class="tab-pane active">
                     <h2><i class="fas fa-chart-line"></i> نظرة عامة</h2>
                     <div class="stats-cards">
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-users"></i></div>
-                            <div class="stat-info">
-                                <h3 id="totalUsers">0</h3>
-                                <p>إجمالي المستخدمين</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
-                            <div class="stat-info">
-                                <h3 id="totalFiles">0</h3>
-                                <p>الملفات المرفوعة</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-download"></i></div>
-                            <div class="stat-info">
-                                <h3 id="totalDownloads">0</h3>
-                                <p>إجمالي التحميلات</p>
-                            </div>
-                        </div>
+                        <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-info"><h3 id="totalUsers">0</h3><p>إجمالي المستخدمين</p></div></div>
+                        <div class="stat-card"><div class="stat-icon"><i class="fas fa-file-alt"></i></div><div class="stat-info"><h3 id="totalFiles">0</h3><p>الملفات المرفوعة</p></div></div>
+                        <div class="stat-card"><div class="stat-icon"><i class="fas fa-download"></i></div><div class="stat-info"><h3 id="totalDownloads">0</h3><p>إجمالي التحميلات</p></div></div>
+                        <div class="stat-card"><div class="stat-icon"><i class="fas fa-shield-alt"></i></div><div class="stat-info"><h3 id="blockedAttempts">0</h3><p>محاولات اختراق محظورة</p></div></div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="statsChart"></canvas>
+                    <div class="chart-container"><canvas id="statsChart"></canvas></div>
+                </div>
+
+                <!-- Users -->
+                <div id="users" class="tab-pane"><h2><i class="fas fa-users"></i> إدارة المستخدمين</h2><div class="table-responsive"><table class="data-table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>نوع الحساب</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody id="usersTableBody"></tbody></table></div></div>
+
+                <!-- Files -->
+                <div id="files" class="tab-pane"><h2><i class="fas fa-folder-open"></i> جميع الملفات</h2><div class="files-grid" id="allFilesGrid"></div></div>
+
+                <!-- Upload -->
+                <div id="upload" class="tab-pane"><h2><i class="fas fa-upload"></i> رفع ملف جديد</h2><div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i><p>اسحب الملف هنا أو اضغط للاختيار</p><input type="file" id="fileUploadInput" style="display:none" multiple><button class="btn btn-primary" onclick="document.getElementById('fileUploadInput').click()"><i class="fas fa-folder-open"></i> اختيار ملف</button></div><div id="fileUploadForm"><input type="text" id="uploadFileName" placeholder="اسم الملف"><textarea id="uploadFileDesc" placeholder="وصف الملف" rows="3"></textarea><select id="uploadFileCategory"><option value="code">أكواد برمجية</option><option value="pdf">كتب PDF</option><option value="tools">أدوات</option></select><button id="confirmUploadBtn" class="btn btn-success"><i class="fas fa-save"></i> حفظ الملف</button></div></div>
+
+                <!-- Email -->
+                <div id="email" class="tab-pane"><h2><i class="fas fa-envelope"></i> إرسال إيميل جماعي</h2><form id="bulkEmailForm"><select id="emailRecipient"><option value="all">جميع المستخدمين</option></select><input type="text" id="emailSubject" placeholder="عنوان الإيميل" required><textarea id="emailBody" placeholder="محتوى الإيميل" rows="6" required></textarea><button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> إرسال</button></form></div>
+
+                <!-- Security -->
+                <div id="security" class="tab-pane">
+                    <h2><i class="fas fa-shield-alt"></i> إعدادات الأمان والحماية</h2>
+                    <div class="security-card">
+                        <div class="security-item">
+                            <h3><i class="fas fa-robot"></i> حماية من البوتات (CAPTCHA)</h3>
+                            <label class="switch"><input type="checkbox" id="captchaEnabled" checked><span class="slider"></span></label>
+                            <p>منع البوتات والبرامج الآلية من تسجيل الدخول</p>
+                        </div>
+                        <div class="security-item">
+                            <h3><i class="fas fa-fingerprint"></i> التحقق بخطوتين (2FA)</h3>
+                            <label class="switch"><input type="checkbox" id="twoFactorEnabled"><span class="slider"></span></label>
+                            <p>إرسال رمز تحقق إضافي عبر البريد الإلكتروني عند تسجيل الدخول</p>
+                        </div>
+                        <div class="security-item">
+                            <h3><i class="fas fa-clock"></i> قفل الجلسة بعد عدم النشاط</h3>
+                            <select id="sessionTimeout"><option value="15">15 دقيقة</option><option value="30" selected>30 دقيقة</option><option value="60">60 دقيقة</option></select>
+                        </div>
+                        <div class="security-logs">
+                            <h3><i class="fas fa-history"></i> سجل محاولات الدخول الفاشلة</h3>
+                            <div id="securityLogs"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- تبويب المستخدمين -->
-                <div id="users" class="tab-pane">
-                    <h2><i class="fas fa-users"></i> إدارة المستخدمين</h2>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr><th>الاسم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr>
-                            </thead>
-                            <tbody id="usersTableBody"></tbody>
-                        </table>
+                <!-- Change Admin -->
+                <div id="changeAdmin" class="tab-pane">
+                    <h2><i class="fas fa-user-shield"></i> تغيير بيانات الأدمن</h2>
+                    <div class="admin-change-card">
+                        <div class="current-admin-info"><p><strong>📧 البريد الحالي:</strong> <span id="currentAdminEmail"></span></p><p><strong>🔐 كلمة السر الحالية:</strong> ••••••••</p></div>
+                        <form id="changeAdminForm">
+                            <div class="form-group"><label>📧 البريد الإلكتروني الجديد</label><input type="email" id="newAdminEmail" placeholder="أدخل البريد الجديد" required></div>
+                            <div class="form-group"><label>🔐 كلمة السر الجديدة</label><input type="password" id="newAdminPassword" placeholder="أدخل كلمة السر الجديدة" required></div>
+                            <div class="form-group"><label>📱 معرف تليجرام (Chat ID)</label><input type="text" id="telegramChatId" placeholder="مثال: 123456789" required><small>🔹 اذهب إلى @userinfobot في تليجرام لتحصل على رقمك</small></div>
+                            <button type="submit" class="btn btn-primary" id="requestCodeBtn"><i class="fas fa-paper-plane"></i> طلب كود التأكيد</button>
+                        </form>
+                        <div id="verifyCodeSection" style="display:none; margin-top:20px;"><div class="form-group"><label>🔢 أدخل كود التأكيد</label><input type="text" id="verificationCode" placeholder="أدخل الكود" maxlength="6"></div><button class="btn btn-success" id="confirmChangeBtn"><i class="fas fa-check-circle"></i> تأكيد التغيير</button><div id="codeTimer"></div></div>
                     </div>
                 </div>
 
-                <!-- تبويب إدارة الملفات -->
-                <div id="files" class="tab-pane">
-                    <h2><i class="fas fa-folder-open"></i> جميع الملفات</h2>
-                    <div class="files-grid" id="allFilesGrid"></div>
-                </div>
-
-                <!-- تبويب رفع ملف -->
-                <div id="upload" class="tab-pane">
-                    <h2><i class="fas fa-upload"></i> رفع ملف جديد</h2>
-                    <div class="upload-area" id="uploadArea">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>اسحب الملف هنا أو اضغط للاختيار</p>
-                        <input type="file" id="fileUploadInput" style="display:none" multiple>
-                        <button class="btn btn-primary" onclick="document.getElementById('fileUploadInput').click()">
-                            <i class="fas fa-folder-open"></i> اختيار ملف
-                        </button>
-                    </div>
-                    <div id="fileUploadForm">
-                        <input type="text" id="uploadFileName" placeholder="اسم الملف (اختياري)">
-                        <textarea id="uploadFileDesc" placeholder="وصف الملف" rows="3"></textarea>
-                        <select id="uploadFileCategory">
-                            <option value="code">أكواد برمجية</option>
-                            <option value="pdf">كتب PDF</option>
-                            <option value="tools">أدوات</option>
-                            <option value="other">أخرى</option>
-                        </select>
-                        <button id="confirmUploadBtn" class="btn btn-success"><i class="fas fa-save"></i> حفظ الملف</button>
-                    </div>
-                </div>
-
-                <!-- تبويب إرسال إيميل -->
-                <div id="email" class="tab-pane">
-                    <h2><i class="fas fa-envelope"></i> إرسال إيميل جماعي</h2>
-                    <form id="bulkEmailForm">
-                        <select id="emailRecipient">
-                            <option value="all">جميع المستخدمين</option>
-                        </select>
-                        <input type="text" id="emailSubject" placeholder="عنوان الإيميل" required>
-                        <textarea id="emailBody" placeholder="محتوى الإيميل" rows="6" required></textarea>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> إرسال</button>
-                            <button type="button" class="btn btn-outline" id="previewEmailBtn"><i class="fas fa-eye"></i> معاينة</button>
+                <!-- Bot Settings -->
+                <div id="botSettings" class="tab-pane">
+                    <h2><i class="fab fa-telegram"></i> إعدادات بوت تليجرام</h2>
+                    <div class="bot-settings-card">
+                        <div class="current-bot-info"><p><strong>🤖 التوكن الحالي:</strong> <code id="currentBotToken">••••••••</code></p></div>
+                        <button class="btn btn-primary" id="showBotTokenFormBtn"><i class="fas fa-edit"></i> تغيير توكن البوت</button>
+                        <div id="botTokenForm" style="display:none; margin-top:20px;">
+                            <div class="form-group"><label>🔑 أدخل كلمة المرور الحالية للأدمن</label><input type="password" id="adminPasswordVerify" placeholder="كلمة المرور"></div>
+                            <div class="form-group"><label>🤖 توكن البوت الجديد</label><input type="text" id="newBotToken" placeholder="أدخل التوكن الجديد"></div>
+                            <button class="btn btn-success" id="saveBotTokenBtn"><i class="fas fa-save"></i> حفظ التوكن</button>
+                            <div id="botTokenMessage"></div>
                         </div>
-                    </form>
-                    <div id="emailPreview" class="email-preview"></div>
-                </div>
-
-                <!-- تبويب الإحصائيات -->
-                <div id="stats" class="tab-pane">
-                    <h2><i class="fas fa-chart-bar"></i> إحصائيات متقدمة</h2>
-                    <div class="stats-filters">
-                        <select id="statsPeriod">
-                            <option value="week">آخر 7 أيام</option>
-                            <option value="month">آخر 30 يوم</option>
-                            <option value="year">آخر سنة</option>
-                        </select>
-                    </div>
-                    <div class="charts-row">
-                        <div class="chart-box"><canvas id="usersChart"></canvas></div>
-                        <div class="chart-box"><canvas id="downloadsChart"></canvas></div>
                     </div>
                 </div>
 
-                <!-- تبويب الإعدادات -->
-                <div id="settings" class="tab-pane">
-                    <h2><i class="fas fa-cog"></i> إعدادات الموقع</h2>
-                    <form id="settingsForm">
-                        <div class="settings-group">
-                            <label>اسم الموقع</label>
-                            <input type="text" id="siteName" value="ALI ZK code">
-                        </div>
-                        <div class="settings-group">
-                            <label>البريد الإلكتروني للأدمن</label>
-                            <input type="email" id="adminEmail" value="admin@alizk.com">
-                        </div>
-                        <div class="settings-group">
-                            <label>الوضع الليلي/النهاري</label>
-                            <label class="switch"><input type="checkbox" id="adminThemeToggle"><span class="slider"></span></label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
-                    </form>
-                </div>
+                <!-- Settings -->
+                <div id="settings" class="tab-pane"><h2><i class="fas fa-cog"></i> إعدادات الموقع</h2><form id="settingsForm"><div class="settings-group"><label>اسم الموقع</label><input type="text" id="siteName" value="ALI ZK code"></div><div class="settings-group"><label>البريد الإلكتروني للأدمن</label><input type="email" id="adminEmail" value="samartaleb90@gmail.com"></div><button type="submit" class="btn btn-primary">حفظ الإعدادات</button></form></div>
             </div>
         </main>
     </div>
 
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <script src="js/admin.js"></script>
+    <script src="js/google-auth.js"></script>
 </body>
 </html>

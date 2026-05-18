@@ -22,8 +22,10 @@
             <div class="auth-tabs">
                 <button class="tab-btn active" data-tab="login">تسجيل الدخول</button>
                 <button class="tab-btn" data-tab="register">إنشاء حساب</button>
+                <button class="tab-btn" data-tab="forgot">نسيت كلمة السر؟</button>
             </div>
 
+            <!-- نموذج تسجيل الدخول -->
             <form id="loginForm" class="auth-form active">
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
@@ -34,11 +36,32 @@
                     <input type="password" id="loginPassword" placeholder="كلمة السر" required>
                     <i class="fas fa-eye toggle-password"></i>
                 </div>
+                
+                <!-- حماية البوتات - CAPTCHA -->
+                <div class="captcha-container">
+                    <p><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
+                    <div class="captcha-box" id="captchaBox">
+                        <span id="captchaQuestion"></span>
+                        <input type="text" id="captchaInput" placeholder="أدخل الإجابة" maxlength="2">
+                    </div>
+                    <button type="button" id="refreshCaptcha" class="btn-captcha-refresh"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                
                 <button type="submit" class="btn btn-primary btn-block">
                     <i class="fas fa-sign-in-alt"></i> دخول
                 </button>
+                
+                <div class="auth-divider">
+                    <span>أو</span>
+                </div>
+                
+                <!-- زر تسجيل الدخول عبر Google -->
+                <button type="button" id="googleLoginBtn" class="btn btn-google btn-block">
+                    <i class="fab fa-google"></i> تسجيل الدخول عبر Google
+                </button>
             </form>
 
+            <!-- نموذج إنشاء حساب -->
             <form id="registerForm" class="auth-form">
                 <div class="input-group">
                     <i class="fas fa-user"></i>
@@ -56,9 +79,44 @@
                     <i class="fas fa-lock"></i>
                     <input type="password" id="regConfirmPassword" placeholder="تأكيد كلمة السر" required>
                 </div>
+                
+                <!-- حماية البوتات للتسجيل -->
+                <div class="captcha-container">
+                    <p><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
+                    <div class="captcha-box">
+                        <span id="captchaQuestionReg"></span>
+                        <input type="text" id="captchaInputReg" placeholder="أدخل الإجابة" maxlength="2">
+                    </div>
+                    <button type="button" id="refreshCaptchaReg" class="btn-captcha-refresh"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                
                 <button type="submit" class="btn btn-primary btn-block">
                     <i class="fas fa-user-plus"></i> إنشاء حساب
                 </button>
+            </form>
+
+            <!-- نموذج استعادة كلمة المرور -->
+            <form id="forgotForm" class="auth-form">
+                <p class="forgot-info">أدخل بريدك الإلكتروني وسنرسل لك رابط استعادة كلمة المرور</p>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="forgotEmail" placeholder="البريد الإلكتروني" required>
+                </div>
+                
+                <!-- حماية البوتات لاستعادة كلمة المرور -->
+                <div class="captcha-container">
+                    <p><i class="fas fa-robot"></i> تأكيد أنك لست روبوتاً:</p>
+                    <div class="captcha-box">
+                        <span id="captchaQuestionForgot"></span>
+                        <input type="text" id="captchaInputForgot" placeholder="أدخل الإجابة" maxlength="2">
+                    </div>
+                    <button type="button" id="refreshCaptchaForgot" class="btn-captcha-refresh"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-paper-plane"></i> إرسال رابط الاستعادة
+                </button>
+                <div id="forgotMessage" class="auth-message"></div>
             </form>
 
             <div id="authMessage" class="auth-message"></div>
@@ -66,5 +124,6 @@
     </div>
 
     <script src="js/script.js"></script>
+    <script src="js/google-auth.js"></script>
 </body>
 </html>
