@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>الملفات - ALI ZK Code</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #0f0c29 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+        .navbar {
+            background: rgba(10, 10, 30, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 1px solid rgba(108, 92, 231, 0.3);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #00cec9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo i { color: #00cec9; }
+        .nav-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 40px;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { background: rgba(108,92,231,0.3); color: #00cec9; }
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 100px 20px 60px; }
+        .section-title { text-align: center; font-size: 2rem; margin-bottom: 40px; }
+        .section-title i { color: #00cec9; margin-left: 10px; }
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .file-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .file-card:hover { transform: translateY(-5px); background: rgba(108,92,231,0.2); border-color: #6c5ce7; }
+        .file-card i { font-size: 2rem; color: #00cec9; margin-bottom: 10px; }
+        .file-card h4 { margin-bottom: 8px; }
+        .file-card p { color: #cbd5e1; font-size: 0.85rem; margin-bottom: 10px; }
+        .btn-download {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-download:hover { transform: translateY(-2px); }
+        .empty-message {
+            text-align: center;
+            padding: 50px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+        }
+        footer { text-align: center; padding: 2rem; background: rgba(0,0,0,0.5); margin-top: 40px; }
+        @media (max-width: 768px) {
+            .navbar { padding: 1rem; }
+            .nav-links { display: none; width: 100%; flex-direction: column; text-align: center; }
+            .nav-links.active { display: flex; }
+            .menu-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-code"></i> ALI ZK <span>code</span></div>
+        <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+            <a href="files.html"><i class="fas fa-folder-open"></i> الملفات</a>
+            <a href="#"><i class="fas fa-star"></i> المميزات</a>
+            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h2 class="section-title"><i class="fas fa-folder-open"></i> مكتبة الملفات</h2>
+        <div id="filesGrid" class="files-grid">
+            <div class="empty-message"><i class="fas fa-inbox"></i><p>لا توجد ملفات مرفوعة حالياً</p></div>
+        </div>
+    </div>
+    <footer><p>© 2025 جميع الحقوق محفوظة - ALI ZK code</p></footer>
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const fontSize = 14;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = [];
+        for (let i = 0; i < columns; i++) drops[i] = Math.floor(Math.random() * -canvas.height);
+        function draw() {
+            ctx.fillStyle = 'rgba(10, 10, 42, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff88';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 50);
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            columns = Math.floor(canvas.width / fontSize);
+            drops = [];
+            for (let i = 0; i < columns; i++) drops[i] = Math.floor(Math.random() * -canvas.height);
+        });
+        document.querySelector('.menu-toggle').addEventListener('click', () => document.querySelector('.nav-links').classList.toggle('active'));
+
+        function getLocal(key) { return JSON.parse(localStorage.getItem(key)) || []; }
+        function renderFiles() {
+            const files = getLocal('files');
+            const grid = document.getElementById('filesGrid');
+            if (!grid) return;
+            if (files.length === 0) {
+                grid.innerHTML = '<div class="empty-message"><i class="fas fa-inbox"></i><p>لا توجد ملفات مرفوعة حالياً</p></div>';
+                return;
+            }
+            grid.innerHTML = files.map(file => `
+                <div class="file-card">
+                    <i class="fas ${file.category === 'code' ? 'fa-file-code' : file.category === 'pdf' ? 'fa-file-pdf' : 'fa-file-alt'}"></i>
+                    <h4>${file.name}</h4>
+                    <p>${file.desc || 'لا يوجد وصف'}</p>
+                    <small>📥 ${file.downloads || 0} تحميل</small><br><br>
+                    <button class="btn-download" onclick="downloadFile(${file.id})"><i class="fas fa-download"></i> تحميل</button>
+                </div>
+            `).join('');
+        }
+        window.downloadFile = function(id) {
+            let files = getLocal('files');
+            const file = files.find(f => f.id === id);
+            if (file) {
+                file.downloads = (file.downloads || 0) + 1;
+                localStorage.setItem('files', JSON.stringify(files));
+                alert(`جاري تحميل: ${file.name}`);
+                renderFiles();
+            }
+        };
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+        renderFiles();
+    </script>
+</body>
+</html>
