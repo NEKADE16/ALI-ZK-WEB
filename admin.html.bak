@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ALI ZK Admin - لوحة التحكم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #0f0c29 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* شريط جانبي */
+        .admin-sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(10, 10, 30, 0.95);
+            backdrop-filter: blur(15px);
+            border-left: 1px solid rgba(108, 92, 231, 0.3);
+            z-index: 100;
+            transition: all 0.3s;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header i {
+            font-size: 2.5rem;
+            color: #00cec9;
+        }
+
+        .sidebar-header h3 {
+            margin-top: 10px;
+            font-size: 1.3rem;
+        }
+
+        .sidebar-header span {
+            color: #00cec9;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .sidebar-menu li {
+            padding: 12px 25px;
+            margin: 5px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .sidebar-menu li:hover {
+            background: rgba(108, 92, 231, 0.3);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .sidebar-menu li.active {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            color: white;
+            box-shadow: 0 5px 15px rgba(108,92,231,0.4);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 20px;
+        }
+
+        .sidebar-footer a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-footer a:hover {
+            background: rgba(220,38,38,0.3);
+            color: #f87171;
+            transform: translateX(-5px);
+        }
+
+        /* المحتوى الرئيسي */
+        .admin-main {
+            margin-right: 280px;
+            min-height: 100vh;
+        }
+
+        /* الهيدر */
+        .admin-header {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .admin-search {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 18px;
+            border-radius: 40px;
+            gap: 10px;
+        }
+
+        .admin-search i {
+            color: #94a3b8;
+        }
+
+        .admin-search input {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 5px;
+            width: 220px;
+            outline: none;
+        }
+
+        .admin-search input::placeholder {
+            color: #64748b;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(108,92,231,0.2);
+            padding: 8px 18px;
+            border-radius: 40px;
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* المحتوى */
+        .admin-content {
+            padding: 25px;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* بطاقات الإحصائيات */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(108,92,231,0.2);
+            border-color: #6c5ce7;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .stat-info p {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        /* الجداول */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .data-table th {
+            background: rgba(108,92,231,0.3);
+            font-weight: 600;
+        }
+
+        /* أزرار */
+        .btn-sm {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 2px;
+        }
+
+        .btn-sm:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108,92,231,0.4);
+        }
+
+        /* ملفات */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .file-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .file-card:hover {
+            transform: translateY(-5px);
+            background: rgba(108,92,231,0.15);
+        }
+
+        /* منطقة الرفع */
+        .upload-area {
+            border: 2px dashed #6c5ce7;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background: rgba(108,92,231,0.1);
+            border-color: #a855f7;
+        }
+
+        /* نماذج */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        /* عناصر الأمان */
+        .security-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.2);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #10b981;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* ترحيب الأدمن */
+        .welcome-card {
+            background: linear-gradient(135deg, rgba(108,92,231,0.3), rgba(168,85,247,0.3));
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+
+        .welcome-card h2 {
+            font-size: 1.5rem;
+        }
+
+        .welcome-card h2 i {
+            color: #fbbf24;
+            margin: 0 5px;
+        }
+
+        .session-time {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        /* سجل الأمان */
+        .security-logs {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .log-entry.success i { color: #10b981; }
+        .log-entry.failed i { color: #ef4444; }
+
+        /* استجابة للجوال */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(100%);
+                width: 260px;
+                z-index: 1001;
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            .admin-main {
+                margin-right: 0;
+            }
+            .stats-cards {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+            .security-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .admin-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .admin-search {
+                width: 100%;
+            }
+            .admin-search input {
+                width: 100%;
+            }
+        }
+
+        /* زر القائمة للجوال */
+        .menu-toggle-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #6c5ce7;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1002;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle-btn {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- زر القائمة للجوال -->
+    <div class="menu-toggle-btn" id="menuToggleBtn">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- الشريط الجانبي -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-code"></i>
+            <h3>ALI ZK <span>Admin</span></h3>
+            <p style="font-size: 0.7rem; color:#94a3b8;">لوحة القيادة</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active" data-tab="dashboard"><i class="fas fa-tachometer-alt"></i> لوحة المعلومات</li>
+            <li data-tab="users"><i class="fas fa-users"></i> المستخدمين</li>
+            <li data-tab="files"><i class="fas fa-folder-open"></i> إدارة الملفات</li>
+            <li data-tab="upload"><i class="fas fa-upload"></i> رفع ملف</li>
+            <li data-tab="email"><i class="fas fa-envelope"></i> إرسال إيميل</li>
+            <li data-tab="security"><i class="fas fa-shield-alt"></i> الأمان والحماية</li>
+            <li data-tab="changeAdmin"><i class="fas fa-user-shield"></i> تغيير بيانات الأدمن</li>
+            <li data-tab="botSettings"><i class="fab fa-telegram"></i> إعدادات البوت</li>
+            <li data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="index.html"><i class="fas fa-home"></i> العودة للموقع</a>
+            <a href="#" id="adminLogout"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</a>
+        </div>
+    </aside>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="admin-main">
+        <div class="admin-header">
+            <div class="admin-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="بحث في لوحة التحكم...">
+            </div>
+            <div class="admin-user">
+                <span>مرحباً، <strong id="adminName">أدمن</strong> 👑</span>
+                <div class="admin-avatar" id="adminAvatar">A</div>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <!-- ترحيب الأدمن المتحرك -->
+            <div class="welcome-card" id="welcomeCard">
+                <h2><i class="fas fa-crown"></i> أهلاً بك سيدي <span id="welcomeAdminName">الأدمن</span> <i class="fas fa-smile-wink"></i></h2>
+                <p>أنت تتحكم بكل شيء هنا! اختر ما تريد إدارته من القائمة الجانبية.</p>
+                <div class="session-time" id="sessionTime"></div>
+            </div>
+
+            <!-- لوحة المعلومات -->
+            <div id="dashboard" class="tab-pane active">
+                <h2><i class="fas fa-chart-line"></i> نظرة عامة</h2>
+                <div class="stats-cards">
+                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-info"><h3 id="totalUsers">0</h3><p>إجمالي المستخدمين</p></div></div>
+                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-file-alt"></i></div><div class="stat-info"><h3 id="totalFiles">0</h3><p>الملفات المرفوعة</p></div></div>
+                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-download"></i></div><div class="stat-info"><h3 id="totalDownloads">0</h3><p>إجمالي التحميلات</p></div></div>
+                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-shield-alt"></i></div><div class="stat-info"><h3 id="blockedAttempts">0</h3><p>محاولات اختراق محظورة</p></div></div>
+                </div>
+                <div class="chart-container" style="background:rgba(255,255,255,0.05); border-radius:20px; padding:20px;">
+                    <canvas id="statsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- المستخدمين -->
+            <div id="users" class="tab-pane">
+                <h2><i class="fas fa-users"></i> إدارة المستخدمين</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>نوع الحساب</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- الملفات -->
+            <div id="files" class="tab-pane">
+                <h2><i class="fas fa-folder-open"></i> جميع الملفات</h2>
+                <div class="files-grid" id="allFilesGrid"></div>
+            </div>
+
+            <!-- رفع ملف -->
+            <div id="upload" class="tab-pane">
+                <h2><i class="fas fa-upload"></i> رفع ملف جديد</h2>
+                <div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i><p>اسحب الملف هنا أو اضغط للاختيار</p><input type="file" id="fileUploadInput" style="display:none" multiple><button class="btn-primary" style="margin-top:15px;" onclick="document.getElementById('fileUploadInput').click()"><i class="fas fa-folder-open"></i> اختيار ملف</button></div>
+                <div id="fileUploadForm"><div class="form-group"><input type="text" id="uploadFileName" placeholder="اسم الملف"></div><div class="form-group"><textarea id="uploadFileDesc" placeholder="وصف الملف" rows="3"></textarea></div><div class="form-group"><select id="uploadFileCategory"><option value="code">أكواد برمجية</option><option value="pdf">كتب PDF</option><option value="tools">أدوات</option></select></div><button id="confirmUploadBtn" class="btn-primary"><i class="fas fa-save"></i> حفظ الملف</button></div>
+            </div>
+
+            <!-- إرسال إيميل -->
+            <div id="email" class="tab-pane">
+                <h2><i class="fas fa-envelope"></i> إرسال إيميل جماعي</h2>
+                <form id="bulkEmailForm"><div class="form-group"><select id="emailRecipient"><option value="all">جميع المستخدمين</option></select></div><div class="form-group"><input type="text" id="emailSubject" placeholder="عنوان الإيميل" required></div><div class="form-group"><textarea id="emailBody" placeholder="محتوى الإيميل" rows="6" required></textarea></div><button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> إرسال</button></form>
+            </div>
+
+            <!-- الأمان -->
+            <div id="security" class="tab-pane">
+                <h2><i class="fas fa-shield-alt"></i> إعدادات الأمان والحماية</h2>
+                <div class="security-item"><div><h3><i class="fas fa-robot"></i> حماية من البوتات (CAPTCHA)</h3><p style="font-size:0.8rem;">منع البوتات والبرامج الآلية</p></div><label class="switch"><input type="checkbox" id="captchaEnabled" checked><span class="slider"></span></label></div>
+                <div class="security-item"><div><h3><i class="fas fa-fingerprint"></i> التحقق بخطوتين (2FA)</h3><p style="font-size:0.8rem;">إرسال رمز تحقق إضافي</p></div><label class="switch"><input type="checkbox" id="twoFactorEnabled"><span class="slider"></span></label></div>
+                <div class="security-item"><div><h3><i class="fas fa-clock"></i> قفل الجلسة بعد عدم النشاط</h3></div><select id="sessionTimeout"><option value="15">15 دقيقة</option><option value="30" selected>30 دقيقة</option><option value="60">60 دقيقة</option></select></div>
+                <div class="security-logs"><h3><i class="fas fa-history"></i> سجل محاولات الدخول الفاشلة</h3><div id="securityLogs"></div></div>
+            </div>
+
+            <!-- تغيير بيانات الأدمن -->
+            <div id="changeAdmin" class="tab-pane">
+                <h2><i class="fas fa-user-shield"></i> تغيير بيانات الأدمن</h2>
+                <div style="background:rgba(255,255,255,0.05); border-radius:20px; padding:20px; max-width:500px;">
+                    <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:16px; margin-bottom:20px;"><p><strong>📧 البريد الحالي:</strong> <span id="currentAdminEmail"></span></p><p><strong>🔐 كلمة السر الحالية:</strong> ••••••••</p></div>
+                    <div class="form-group"><label>📧 البريد الإلكتروني الجديد</label><input type="email" id="newAdminEmail" placeholder="أدخل البريد الجديد"></div>
+                    <div class="form-group"><label>🔐 كلمة السر الجديدة</label><input type="password" id="newAdminPassword" placeholder="أدخل كلمة السر الجديدة"></div>
+                    <div class="form-group"><label>📱 معرف تليجرام (Chat ID)</label><input type="text" id="telegramChatId" placeholder="مثال: 123456789"><small style="display:block; margin-top:5px; color:#94a3b8;">🔹 اذهب إلى @userinfobot في تليجرام لتحصل على رقمك</small></div>
+                    <button class="btn-primary" id="requestCodeBtn"><i class="fas fa-paper-plane"></i> طلب كود التأكيد</button>
+                    <div id="verifyCodeSection" style="display:none; margin-top:20px;"><div class="form-group"><label>🔢 أدخل كود التأكيد</label><input type="text" id="verificationCode" placeholder="أدخل الكود" maxlength="6"></div><button class="btn-primary" id="confirmChangeBtn"><i class="fas fa-check-circle"></i> تأكيد التغيير</button><div id="codeTimer"></div></div>
+                </div>
+            </div>
+
+            <!-- إعدادات البوت -->
+            <div id="botSettings" class="tab-pane">
+                <h2><i class="fab fa-telegram"></i> إعدادات بوت تليجرام</h2>
+                <div style="background:rgba(255,255,255,0.05); border-radius:20px; padding:20px; max-width:500px;">
+                    <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:16px; margin-bottom:20px;"><p><strong>🤖 التوكن الحالي:</strong> <code id="currentBotToken" style="background:#1a1a2e; padding:5px 10px; border-radius:8px;">••••••••</code></p></div>
+                    <button class="btn-primary" id="showBotTokenFormBtn"><i class="fas fa-edit"></i> تغيير توكن البوت</button>
+                    <div id="botTokenForm" style="display:none; margin-top:20px;"><div class="form-group"><label>🔑 أدخل كلمة المرور الحالية للأدمن</label><input type="password" id="adminPasswordVerify" placeholder="كلمة المرور"></div><div class="form-group"><label>🤖 توكن البوت الجديد</label><input type="text" id="newBotToken" placeholder="أدخل التوكن الجديد"></div><button class="btn-primary" id="saveBotTokenBtn"><i class="fas fa-save"></i> حفظ التوكن</button><div id="botTokenMessage"></div></div>
+                </div>
+            </div>
+
+            <!-- الإعدادات -->
+            <div id="settings" class="tab-pane">
+                <h2><i class="fas fa-cog"></i> إعدادات الموقع</h2>
+                <div style="background:rgba(255,255,255,0.05); border-radius:20px; padding:20px; max-width:500px;">
+                    <form id="settingsForm"><div class="form-group"><label>اسم الموقع</label><input type="text" id="siteName" value="ALI ZK code"></div><div class="form-group"><label>البريد الإلكتروني للأدمن</label><input type="email" id="adminEmail" value="samartaleb90@gmail.com"></div><button type="submit" class="btn-primary"><i class="fas fa-save"></i> حفظ الإعدادات</button></form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ========== البيانات ==========
+        function setLocal(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+        function getLocal(key) { return JSON.parse(localStorage.getItem(key)) || []; }
+
+        // التحقق من الأدمن
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser || currentUser.role !== 'admin') {
+            window.location.href = 'login.html';
+        }
+
+        // عرض اسم الأدمن
+        document.getElementById('adminName').innerText = currentUser.name;
+        document.getElementById('welcomeAdminName').innerText = currentUser.name;
+        document.getElementById('adminAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
+
+        // وقت الجلسة
+        function updateSessionTime() {
+            const now = new Date();
+            document.getElementById('sessionTime').innerHTML = `<i class="fas fa-clock"></i> آخر دخول: ${now.toLocaleString('ar-EG')}`;
+        }
+        updateSessionTime();
+
+        // تهيئة البيانات
+        if (!localStorage.getItem('users')) {
+            setLocal('users', [{ id: 1, name: 'علي الزين', email: 'samartaleb90@gmail.com', password: '12344321', role: 'admin', date: new Date().toISOString(), provider: 'local' }]);
+        }
+        if (!localStorage.getItem('files')) { setLocal('files', []); }
+        if (!localStorage.getItem('botToken')) { setLocal('botToken', '8781090807:AAFYq2a6SnJ5TBcLDF-gmIBZfez1gcPJEyg'); }
+        if (!localStorage.getItem('securityLogs')) { setLocal('securityLogs', []); }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            const users = getLocal('users');
+            const files = getLocal('files');
+            const logs = getLocal('securityLogs');
+            document.getElementById('totalUsers').innerText = users.length;
+            document.getElementById('totalFiles').innerText = files.length;
+            const totalDownloads = files.reduce((sum, f) => sum + (f.downloads || 0), 0);
+            document.getElementById('totalDownloads').innerText = totalDownloads;
+            document.getElementById('blockedAttempts').innerText = logs.filter(l => l.type === 'failed').length;
+        }
+
+        // عرض المستخدمين
+        function renderUsers() {
+            const users = getLocal('users');
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = users.filter(u => u.role !== 'admin').map(user => `
+                <tr><td>${user.name}</td><td>${user.email}${user.provider === 'google' ? ' <i class="fab fa-google" style="color:#4285f4;"></i>' : ''}</td><td>مستخدم</td><td>${new Date(user.date).toLocaleDateString('ar-EG')}</td><td><button onclick="deleteUser(${user.id})" class="btn-sm btn-danger"><i class="fas fa-trash"></i></button></td></tr>
+            `).join('');
+        }
+
+        window.deleteUser = function(id) {
+            if (confirm('حذف المستخدم؟')) {
+                let users = getLocal('users');
+                users = users.filter(u => u.id !== id);
+                setLocal('users', users);
+                renderUsers();
+                updateStats();
+            }
+        };
+
+        // عرض الملفات
+        function renderFiles() {
+            const files = getLocal('files');
+            const container = document.getElementById('allFilesGrid');
+            if (!container) return;
+            container.innerHTML = files.map(file => `
+                <div class="file-card"><i class="fas fa-file-code" style="font-size:2rem; color:#6c5ce7;"></i><h4>${file.name}</h4><p>${file.desc || 'لا يوجد وصف'}</p><small>📥 ${file.downloads || 0} تحميل</small><div style="margin-top:10px; display:flex; gap:10px;"><button onclick="downloadFile(${file.id})" class="btn-sm btn-success"><i class="fas fa-download"></i></button><button onclick="deleteFile(${file.id})" class="btn-sm btn-danger"><i class="fas fa-trash"></i></button></div></div>
+            `).join('');
+        }
+
+        window.downloadFile = function(id) {
+            let files = getLocal('files');
+            const file = files.find(f => f.id === id);
+            if (file) { file.downloads = (file.downloads || 0) + 1; setLocal('files', files); alert(`تحميل: ${file.name}`); renderFiles(); updateStats(); }
+        };
+
+        window.deleteFile = function(id) {
+            if (confirm('حذف الملف؟')) {
+                let files = getLocal('files');
+                files = files.filter(f => f.id !== id);
+                setLocal('files', files);
+                renderFiles();
+                updateStats();
+            }
+        };
+
+        // رفع ملف
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileUploadInput');
+        if (uploadArea) {
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.background = 'rgba(108,92,231,0.2)'; });
+            uploadArea.addEventListener('dragleave', () => uploadArea.style.background = '');
+            uploadArea.addEventListener('drop', (e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); });
+            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        }
+        function handleFiles(files) { if (files.length > 0) { document.getElementById('uploadFileName').value = files[0].name; } }
+        document.getElementById('confirmUploadBtn')?.addEventListener('click', () => {
+            const name = document.getElementById('uploadFileName').value;
+            const desc = document.getElementById('uploadFileDesc').value;
+            const category = document.getElementById('uploadFileCategory').value;
+            if (!name) { alert('أدخل اسم الملف'); return; }
+            const files = getLocal('files');
+            files.push({ id: files.length + 1, name, desc, category, downloads: 0, date: new Date().toISOString() });
+            setLocal('files', files);
+            alert('تم الرفع!');
+            document.getElementById('uploadFileName').value = '';
+            document.getElementById('uploadFileDesc').value = '';
+            renderFiles();
+            updateStats();
+        });
+
+        // إرسال إيميل
+        document.getElementById('bulkEmailForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert(`✅ تم إرسال الإيميل إلى ${getLocal('users').length} مستخدم`);
+        });
+
+        // تبديل التبويبات
+        document.querySelectorAll('.sidebar-menu li').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+                document.getElementById(item.dataset.tab).classList.add('active');
+            });
+        });
+
+        // الرسم البياني
+        if (document.getElementById('statsChart')) {
+            new Chart(document.getElementById('statsChart'), {
+                type: 'line',
+                data: { labels: ['أسبوع 1', 'أسبوع 2', 'أسبوع 3', 'أسبوع 4'], datasets: [{ label: 'مستخدمين جدد', data: [3, 7, 5, 12], borderColor: '#6c5ce7', tension: 0.4, fill: true, backgroundColor: 'rgba(108,92,231,0.1)' }] }
+            });
+        }
+
+        // تسجيل الخروج
+        document.getElementById('adminLogout')?.addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+
+        // قائمة الجوال
+        document.getElementById('menuToggleBtn')?.addEventListener('click', () => {
+            document.getElementById('adminSidebar').classList.toggle('open');
+        });
+
+        // عرض البريد الحالي
+        const admin = getLocal('users').find(u => u.role === 'admin');
+        if (admin && document.getElementById('currentAdminEmail')) document.getElementById('currentAdminEmail').innerText = admin.email;
+
+        // تهيئة الصفحة
+        updateStats();
+        renderUsers();
+        renderFiles();
+    </script>
+</body>
+</html>
